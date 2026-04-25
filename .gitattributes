@@ -1,0 +1,5 @@
+# Ignore frontend (JS) from language stats
+frontend/** linguist-vendored
+
+# Ensure Go is counted normally
+*.go linguist-detectable=true
