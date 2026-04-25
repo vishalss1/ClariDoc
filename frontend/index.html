@@ -7,20 +7,21 @@
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/layout.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <header class="top-nav">
     <div class="nav-inner">
-      <a href="#" class="brand">
+      <a href="/index.html" class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
         <span>ClariDoc</span>
       </a>
       <nav class="nav-links" aria-label="Main Navigation">
-        <button id="nav-clarify-link" class="nav-link" type="button">Clarify</button>
-        <button id="nav-brief-link" class="nav-link" type="button">Brief</button>
-        <a class="nav-link" href="#features">Docs</a>
-        <button id="nav-start-btn" class="btn btn-primary btn-sm" type="button">Start Transform</button>
+        <a class="nav-link" href="/transform.html">Clarify</a>
+        <a class="nav-link" href="/brief.html">Brief</a>
+        <a class="nav-link" href="#transform-preview">Docs</a>
+        <a class="btn btn-primary btn-sm" href="/transform.html">Start Transform</a>
       </nav>
     </div>
   </header>
@@ -67,221 +68,71 @@
   </section>
 
   <main class="container">
-    <section class="interactive-demo reveal-section contrast-block">
-      <div class="demo-head">
-        <p class="kicker">Interactive Demo</p>
-        <h2>Watch the product work as you interact</h2>
-        <p>Paste docs, trigger transform, and follow each stage from input to streamed output.</p>
+    <section id="transform-preview" class="landing-section reveal-section">
+      <div class="landing-cards-wrap">
+        <div class="mini-preview-container">
+          <div class="preview-grid">
+            <div class="preview-card preview-mini-card">
+              <p class="preview-title">README.md</p>
+              <p class="preview-demo-text">Retry Policy<br>Use idempotency keys to prevent duplicate charges.<br>Retries use exponential backoff with increasing delay between attempts.<br>Ensures safe retry behavior without duplicating transactions.</p>
+              <pre class="preview-mini-code"><code>func Charge(...) {
+  retry with backoff
+}</code></pre>
+            </div>
+            <div class="preview-card preview-mini-card">
+              <p id="clarify-preview-title" class="preview-title accent">Simplified + Hinglish</p>
+              <p id="clarify-preview-text" class="preview-demo-text preview-fade-target">Simple: agar payment fail ho, retry karo with same key.<br>Duplicate charge avoid hota hai.<br>Backoff use hota hai retry ke beech.</p>
+              <pre class="preview-mini-code"><code>func Charge(...) {
+  retry with backoff
+}</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="segmented-control preview-toggle" id="landing-clarify-audience">
+          <button type="button" data-audience="junior" class="active">Junior Dev</button>
+          <button type="button" data-audience="senior">Senior Dev</button>
+          <button type="button" data-audience="nontechnical">Non-Technical</button>
+        </div>
       </div>
-      <div class="demo-cards">
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4m10-10h-4M6 12H2m16.95 6.95-2.83-2.83M7.88 7.88 5.05 5.05m13.9 0-2.83 2.83M7.88 16.12l-2.83 2.83"/></svg>
-          </div>
-          <h3>Paste or Upload</h3>
-          <p>Input is highlighted first so users know exactly where to start.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 6h8M8 12h8M8 18h5"/><path d="M4 4h16v16H4z"/></svg>
-          </div>
-          <h3>Processing State</h3>
-          <p>Shimmer loading and step progress make backend work visible.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="m12 3 9 9-9 9"/></svg>
-          </div>
-          <h3>Streamed Result</h3>
-          <p>Output panels reveal with motion and live token streaming.</p>
-        </article>
+      <div class="landing-copy">
+        <h2>Paste your docs. Get output tailored to your level and language.</h2>
+        <p>Switch audience and language, then read a version built for that exact reader.</p>
       </div>
     </section>
 
-    <section id="app" class="app-shell reveal-section">
-      <section class="mode-switch">
-        <div class="segmented-control" id="mode-buttons">
-          <button type="button" data-mode="clarify" class="active">Clarify</button>
-          <button type="button" data-mode="brief">Brief</button>
-        </div>
-      </section>
-
-      <div id="clarify-view" class="mode-view flow-state idle">
-        <div class="flow-intro">
-          <p class="kicker">Transform Flow</p>
-          <h2>From raw docs to audience-ready output</h2>
-        </div>
-        <section class="card input-card">
-          <div class="flow-steps" id="transform-steps">
-            <div class="flow-step active" data-step="1">
-              <span class="flow-step-icon">
-                <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg>
-              </span>
-              <span>1. Input</span>
-            </div>
-            <div class="flow-step" data-step="2">
-              <span class="flow-step-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="m18.4 5.6-2.1 2.1"/><path d="m7.7 16.3-2.1 2.1"/></svg>
-              </span>
-              <span>2. Processing</span>
-            </div>
-            <div class="flow-step" data-step="3">
-              <span class="flow-step-icon">
-                <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
-              </span>
-              <span>3. Output</span>
-            </div>
-          </div>
-          <h2 class="section-title">Input</h2>
-          <div class="input-controls">
-            <textarea id="doc-input" placeholder="Paste your documentation here..."></textarea>
-            <div class="file-upload">
-              <input type="file" id="file-input" accept=".md,.txt">
-              <label for="file-input" class="btn btn-secondary">Upload .md or .txt</label>
-            </div>
-          </div>
-        </section>
-
-        <section class="card controls-row">
-          <div class="control-group">
-            <h3 class="control-label">Audience</h3>
-            <div class="segmented-control" id="audience-buttons">
-              <button type="button" data-audience="junior" class="active">Junior Dev</button>
-              <button type="button" data-audience="senior">Senior Dev</button>
-              <button type="button" data-audience="nontechnical">Non-Technical</button>
-            </div>
-          </div>
-          <div class="control-group">
-            <h3 class="control-label">Language</h3>
-            <select id="language-select">
-              <option value="">Loading languages...</option>
-            </select>
-          </div>
-          <div class="control-group action-group">
-            <button id="transform-btn" class="btn btn-primary" type="button">Transform</button>
-          </div>
-        </section>
-
-        <section id="clarify-output-section" class="output-section">
-          <div class="output-grid">
-            <div class="output-panel">
-              <h3>Original</h3>
-              <div id="original-panel" class="panel-content"></div>
-            </div>
-            <div class="output-panel">
-              <h3>Transformed</h3>
-              <div id="output-panel" class="panel-content"></div>
-            </div>
-          </div>
-        </section>
+    <section class="landing-section landing-section-reverse reveal-section">
+      <div class="landing-copy">
+        <h2>Give a goal. Get a step-by-step execution brief.</h2>
+        <p>ClariDoc identifies missing files first, then produces an ordered action plan you can execute.</p>
       </div>
-
-      <div id="brief-view" class="mode-view hidden">
-        <div class="flow-intro">
-          <p class="kicker">Brief Flow</p>
-          <h2>Goal-driven analysis with guided context collection</h2>
-        </div>
-        <section id="brief-step-1" class="card brief-step">
-          <p class="step-label">Step 1</p>
-          <h2 class="section-title">Goal + Documentation</h2>
-          <div class="brief-stack">
-            <textarea id="brief-goal" class="brief-goal" placeholder="I need to add a new payment provider to the checkout service"></textarea>
-            <textarea id="brief-doc" placeholder="Paste the relevant architecture or onboarding doc..."></textarea>
-          </div>
-          <div class="brief-controls">
-            <div class="control-group">
-              <h3 class="control-label">Audience</h3>
-              <div class="segmented-control" id="brief-audience-buttons">
-                <button type="button" data-audience="junior" class="active">Junior Dev</button>
-                <button type="button" data-audience="senior">Senior Dev</button>
-                <button type="button" data-audience="nontechnical">Non-Technical</button>
+      <div class="landing-cards-wrap">
+        <div class="mini-preview-container">
+          <div class="preview-grid">
+            <div class="preview-card preview-mini-card">
+              <p class="preview-title">Goal</p>
+              <p class="preview-demo-text">Add Razorpay integration to checkout with retries and idempotency handling across failures.</p>
+            </div>
+            <div class="preview-card preview-mini-card">
+              <p class="preview-title accent">Execution Brief</p>
+              <div id="brief-stage-1" class="brief-stage active">
+                <p class="preview-demo-text">Gap detected:<br>PaymentGateway interface not defined<br>Retry strategy unclear in current implementation</p>
+              </div>
+              <div id="brief-stage-2" class="brief-stage">
+                <p class="preview-demo-text">Requesting:<br>internal/payment/gateway.go<br>checkout/service.go</p>
+              </div>
+              <div id="brief-stage-3" class="brief-stage">
+                <ul class="preview-mini-list">
+                  <li>Implement PaymentGateway interface abstraction</li>
+                  <li>Add Razorpay provider implementation</li>
+                  <li>Integrate into checkout service flow</li>
+                  <li>Add retry logic with exponential backoff</li>
+                  <li>Ensure idempotency key handling across retries</li>
+                </ul>
+                <p class="preview-note">Missing: gateway.go, checkout/service.go</p>
               </div>
             </div>
-            <div class="control-group">
-              <h3 class="control-label">Language</h3>
-              <select id="brief-language-select">
-                <option value="">Loading languages...</option>
-              </select>
-            </div>
-            <div class="control-group action-group">
-              <button id="brief-analyze-btn" class="btn btn-primary" type="button">Analyze Gaps</button>
-            </div>
           </div>
-        </section>
-
-        <section class="output-section brief-grid">
-          <div id="brief-step-2" class="output-panel">
-            <p class="step-label">Step 2</p>
-            <h3>Gap Report</h3>
-            <div id="brief-gap-panel" class="panel-content">Run analysis to see what is covered, what is missing, and which files are needed.</div>
-          </div>
-          <div id="brief-step-3" class="output-panel">
-            <p class="step-label">Step 3</p>
-            <h3>Context Files</h3>
-            <div id="brief-file-loop" class="panel-content">Requested files will appear here after analysis.</div>
-          </div>
-        </section>
-
-        <section id="brief-step-4" class="card brief-step">
-          <p class="step-label">Step 4</p>
-          <div class="brief-output-head">
-            <h3>Briefing Output</h3>
-            <button id="brief-generate-btn" class="btn btn-primary" type="button" disabled>Generate Briefing</button>
-          </div>
-          <div id="briefing-panel" class="panel-content"></div>
-        </section>
-      </div>
-    </section>
-
-    <section class="stats-strip reveal-section">
-      <article class="stat-item">
-        <div class="feature-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M2 12h4l2 5 4-10 2 5h8"/></svg>
         </div>
-        <h3>Real-time streaming</h3>
-        <p>Token-level updates without waiting for full completion.</p>
-      </article>
-      <article class="stat-item">
-        <div class="feature-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
-        </div>
-        <h3>Audience-aware output</h3>
-        <p>Junior, senior, and non-technical readers get tailored results.</p>
-      </article>
-      <article class="stat-item">
-        <div class="feature-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg>
-        </div>
-        <h3>Multi-language support</h3>
-        <p>Instant transforms across a broad language list.</p>
-      </article>
-    </section>
-
-    <section id="features" class="features-section reveal-section contrast-block">
-      <p class="kicker">Core capabilities</p>
-      <h2>Everything you need to move from docs to action</h2>
-      <div class="features-grid">
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="m13 2-9 14h7l-1 6 10-14h-7l0-6z"/></svg>
-          </div>
-          <h3>Real-Time Transform</h3>
-          <p>Streamed markdown output so you can start reading before generation completes.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
-          </div>
-          <h3>Audience-Aware Output</h3>
-          <p>Switch between technical depth levels without rewriting source docs manually.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z"/><path d="M14 2v6h6"/></svg>
-          </div>
-          <h3>Brief Mode</h3>
-          <p>Goal-driven analysis that identifies missing context and generates actionable briefings.</p>
-        </article>
       </div>
     </section>
 
@@ -290,8 +141,8 @@
         <p class="kicker">Get started</p>
         <h2>Ready to actually understand your docs?</h2>
         <div class="cta-actions">
-          <button id="footer-start-btn" class="btn btn-primary" type="button">Start Transform</button>
-          <button id="footer-brief-btn" class="btn btn-secondary" type="button">Try Brief Mode</button>
+          <a class="btn btn-primary" href="/transform.html">Start Transform</a>
+          <a class="btn btn-secondary" href="/brief.html">Try Brief Mode</a>
         </div>
       </div>
     </section>
@@ -301,6 +152,6 @@
     <p>ClariDoc</p>
   </footer>
 
-  <script type="module" src="/js/main.js"></script>
+  <script type="module" src="/js/landing.js"></script>
 </body>
 </html>

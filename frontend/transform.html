@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClariDoc Transform</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <header class="top-nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>ClariDoc</span>
+      </a>
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a class="nav-link" href="/index.html">Home</a>
+        <a class="nav-link" href="/brief.html">Brief</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container product-page">
+    <section class="tool-shell">
+      <textarea id="doc-input" placeholder="Paste documentation..."></textarea>
+      <div class="tool-controls">
+        <div class="file-upload">
+          <input type="file" id="file-input" accept=".md,.txt">
+          <label for="file-input" class="btn btn-secondary">Upload .md or .txt</label>
+        </div>
+        <div class="segmented-control" id="audience-buttons">
+          <button type="button" data-audience="junior" class="active">Junior Dev</button>
+          <button type="button" data-audience="senior">Senior Dev</button>
+          <button type="button" data-audience="nontechnical">Non-Technical</button>
+        </div>
+        <select id="language-select">
+          <option value="">Loading languages...</option>
+        </select>
+        <button id="transform-btn" class="btn btn-primary" type="button">Transform</button>
+      </div>
+      <div id="transform-loading" class="processing-state hidden">
+        <span class="processing-dot"></span>
+        <span>Processing...</span>
+      </div>
+      <div id="transform-output-section" class="output-grid hidden">
+        <div class="output-panel">
+          <h3>Original</h3>
+          <div id="original-panel" class="panel-content"></div>
+        </div>
+        <div class="output-panel">
+          <h3>Transformed</h3>
+          <div class="output-actions">
+            <button id="transform-copy-btn" class="btn btn-secondary btn-sm" type="button" disabled>Copy</button>
+            <button id="transform-download-btn" class="btn btn-secondary btn-sm" type="button" disabled>Download .md</button>
+          </div>
+          <div id="output-panel" class="panel-content streaming-panel">
+            <p class="panel-hint">Transformed output will stream here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-footer">
+      <div class="cta-content">
+        <p class="kicker">Get started</p>
+        <h2>Ready to actually understand your docs?</h2>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="/transform.html">Start Transform</a>
+          <a class="btn btn-secondary" href="/brief.html">Try Brief Mode</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>ClariDoc</p>
+  </footer>
+
+  <script type="module" src="/js/transform-page.js"></script>
+</body>
+</html>

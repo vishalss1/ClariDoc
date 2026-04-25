@@ -5,6 +5,7 @@ package locale
 func SupportedLanguages() []string {
 	return []string{
 		"English",
+		"Hinglish",
 		"Hindi",
 		"Spanish",
 		"French",

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/vishalss1/ClariDoc/internal/brief"
 	"github.com/vishalss1/ClariDoc/internal/config"
@@ -30,11 +31,11 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/transform", corsMiddleware(transform.TransformHandler(geminiClient)))
-	mux.Handle("/ingest", corsMiddleware(ingest.IngestHandler()))
-	mux.Handle("/locale", corsMiddleware(locale.LocaleHandler()))
-	mux.Handle("/brief/analyze", corsMiddleware(brief.AnalyzeHandler(geminiClient)))
-	mux.Handle("/brief/generate", corsMiddleware(brief.GenerateHandler(geminiClient)))
+	mux.Handle("/transform", apiLogMiddleware(corsMiddleware(transform.TransformHandler(geminiClient))))
+	mux.Handle("/ingest", apiLogMiddleware(corsMiddleware(ingest.IngestHandler())))
+	mux.Handle("/locale", apiLogMiddleware(corsMiddleware(locale.LocaleHandler())))
+	mux.Handle("/brief/analyze", apiLogMiddleware(corsMiddleware(brief.AnalyzeHandler(geminiClient))))
+	mux.Handle("/brief/generate", apiLogMiddleware(corsMiddleware(brief.GenerateHandler(geminiClient))))
 	mux.Handle("/", corsMiddleware(http.FileServer(http.Dir("frontend"))))
 
 	fmt.Printf("ClariDoc server starting on port %s\n", cfg.Port)
@@ -54,5 +55,37 @@ func corsMiddleware(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+type statusRecorder struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (sr *statusRecorder) WriteHeader(code int) {
+	sr.statusCode = code
+	sr.ResponseWriter.WriteHeader(code)
+}
+
+// apiLogMiddleware logs API hits with method, path, status, duration, and client.
+func apiLogMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rec := &statusRecorder{
+			ResponseWriter: w,
+			statusCode:     http.StatusOK,
+		}
+
+		next.ServeHTTP(rec, r)
+
+		log.Printf(
+			"API %s %s status=%d duration=%s client=%s",
+			r.Method,
+			r.URL.Path,
+			rec.statusCode,
+			time.Since(start).Truncate(time.Millisecond),
+			r.RemoteAddr,
+		)
 	})
 }
