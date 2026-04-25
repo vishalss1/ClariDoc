@@ -12,6 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/vishalss1/ClariDoc/internal/gemini"
+	"github.com/vishalss1/ClariDoc/internal/ingest"
 	"github.com/vishalss1/ClariDoc/internal/transform"
 )
 
@@ -43,7 +44,7 @@ func main() {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/test-gemini", handleTestGemini(geminiClient))
 	http.HandleFunc("/transform", transform.TransformHandler(geminiClient))
-	http.HandleFunc("/ingest", handleIngest)
+	http.HandleFunc("/ingest", ingest.IngestHandler())
 	http.HandleFunc("/locale", handleLocale)
 
 	fmt.Printf("ClariDoc server starting on port %s\n", port)
@@ -57,7 +58,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "<!DOCTYPE html><html><head><title>ClariDoc</title></head><body><h1>ClariDoc - Phase 3</h1><p>Server is running. Test Gemini: <a href='/test-gemini'>/test-gemini</a></p></body></html>")
+	fmt.Fprintln(w, "<!DOCTYPE html><html><head><title>ClariDoc</title></head><body><h1>ClariDoc - Phase 4</h1><p>Server is running.</p><ul><li>Test Ingest: <code>curl -X POST /ingest -F 'file=@README.md'</code></li><li>Test Transform: <a href='/test-gemini'>/test-gemini</a></li></ul></body></html>")
 }
 
 func handleTestGemini(client *gemini.Client) http.HandlerFunc {
@@ -108,15 +109,6 @@ func (sw *streamWriter) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func handleIngest(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	// Stub response for Phase 1
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"content": ""})
-}
 
 func handleLocale(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
