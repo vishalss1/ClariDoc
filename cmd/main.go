@@ -12,6 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/vishalss1/ClariDoc/internal/gemini"
+	"github.com/vishalss1/ClariDoc/internal/transform"
 )
 
 func main() {
@@ -41,7 +42,7 @@ func main() {
 	// Register routes
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/test-gemini", handleTestGemini(geminiClient))
-	http.HandleFunc("/transform", handleTransform)
+	http.HandleFunc("/transform", transform.TransformHandler(geminiClient))
 	http.HandleFunc("/ingest", handleIngest)
 	http.HandleFunc("/locale", handleLocale)
 
@@ -56,7 +57,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "<!DOCTYPE html><html><head><title>ClariDoc</title></head><body><h1>ClariDoc - Phase 2</h1><p>Server is running. Test Gemini: <a href='/test-gemini'>/test-gemini</a></p></body></html>")
+	fmt.Fprintln(w, "<!DOCTYPE html><html><head><title>ClariDoc</title></head><body><h1>ClariDoc - Phase 3</h1><p>Server is running. Test Gemini: <a href='/test-gemini'>/test-gemini</a></p></body></html>")
 }
 
 func handleTestGemini(client *gemini.Client) http.HandlerFunc {
@@ -105,17 +106,6 @@ func (sw *streamWriter) Write(p []byte) (int, error) {
 	fmt.Fprintf(sw.w, "data: %s\n\n", strings.TrimSpace(string(p)))
 	sw.flusher.Flush()
 	return len(p), nil
-}
-
-func handleTransform(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	// Stub response for Phase 1
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	fmt.Fprint(w, "data: Transform endpoint ready\n\n")
 }
 
 func handleIngest(w http.ResponseWriter, r *http.Request) {
