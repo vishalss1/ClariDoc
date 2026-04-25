@@ -150,7 +150,12 @@
   margin-top: 0.85rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  min-width: 0;
   gap: 1rem;
+}
+
+.output-grid > * {
+  min-width: 0;
 }
 
 .output-panel {
@@ -174,6 +179,10 @@
   min-height: 220px;
   max-height: 540px;
   overflow: auto;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
   padding: 1rem;
 }
 
