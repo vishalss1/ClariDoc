@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/vishalss1/ClariDoc/internal/brief"
@@ -17,16 +19,28 @@ import (
 
 func main() {
 	cfg := config.Load()
+	provider := strings.ToLower(strings.TrimSpace(os.Getenv("PROVIDER")))
+	if provider == "" {
+		provider = "gemini"
+	}
+	groqAPIKey := os.Getenv("GROQ_API_KEY")
 
-	// Initialize Gemini client
+	// Initialize AI client
 	var geminiClient *gemini.Client
-	if cfg.GeminiAPIKey != "" {
+	if provider == "gemini" && cfg.GeminiAPIKey == "" {
+		log.Println("Warning: GEMINI_API_KEY is empty while PROVIDER=gemini")
+	}
+	if provider == "groq" && strings.TrimSpace(groqAPIKey) == "" {
+		log.Println("Warning: GROQ_API_KEY is empty while PROVIDER=groq")
+	}
+
+	{
 		var err error
-		geminiClient, err = gemini.NewClient(context.Background(), cfg.GeminiAPIKey)
+		geminiClient, err = gemini.NewClient(context.Background(), provider, cfg.GeminiAPIKey, groqAPIKey)
 		if err != nil {
-			log.Printf("Warning: Failed to initialize Gemini client: %v", err)
+			log.Printf("Warning: Failed to initialize AI client (provider=%s): %v", provider, err)
 		} else {
-			log.Println("Gemini client initialized")
+			log.Printf("AI client initialized (provider=%s)", provider)
 		}
 	}
 
@@ -66,6 +80,12 @@ type statusRecorder struct {
 func (sr *statusRecorder) WriteHeader(code int) {
 	sr.statusCode = code
 	sr.ResponseWriter.WriteHeader(code)
+}
+
+func (sr *statusRecorder) Flush() {
+	if flusher, ok := sr.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 // apiLogMiddleware logs API hits with method, path, status, duration, and client.

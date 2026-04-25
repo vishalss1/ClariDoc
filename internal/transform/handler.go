@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -32,6 +33,7 @@ func TransformHandler(client *gemini.Client) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
 			return
 		}
+		log.Printf("transform handler called, audience=%s target=%s", req.Audience, req.TargetLanguage)
 
 		// Validate request
 		if err := req.Validate(); err != nil {
@@ -41,17 +43,22 @@ func TransformHandler(client *gemini.Client) http.HandlerFunc {
 
 		// Build prompt from audience × language combination
 		prompt := gemini.BuildPrompt(req.Audience, req.TargetLanguage, req.SourceLanguage, req.Content)
+		log.Printf("prompt built, length=%d", len(prompt))
 
 		// Set SSE headers
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
+		w.Header().Del("Content-Length")
+		w.WriteHeader(http.StatusOK)
 
 		flusher, ok := w.(http.Flusher)
 		if !ok {
-			http.Error(w, "Streaming not supported", http.StatusInternalServerError)
+			log.Printf("flusher not supported")
+			http.Error(w, "streaming not supported", http.StatusInternalServerError)
 			return
 		}
+		log.Printf("flusher ok, calling StreamTransform")
 
 		// Create context with timeout
 		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
@@ -63,8 +70,9 @@ func TransformHandler(client *gemini.Client) http.HandlerFunc {
 			flusher: flusher,
 		}
 
-		err := client.StreamTransform(ctx, prompt, streamWriter)
+		err := client.StreamTransform(ctx, prompt, streamWriter, flusher)
 		if err != nil {
+			log.Printf("stream transform returned error, writing SSE error event: %v", err)
 			fmt.Fprintf(w, "data: [ERROR] %v\n\n", err)
 			flusher.Flush()
 		}

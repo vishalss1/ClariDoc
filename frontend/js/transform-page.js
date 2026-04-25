@@ -4,6 +4,11 @@ import { initLocale } from './locale.js';
 import { appendChunk, finalizeRender, renderMarkdown, showSkeleton } from './render.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.__claridocTransformPageInitialized) {
+    return;
+  }
+  window.__claridocTransformPageInitialized = true;
+
   const docInput = document.getElementById('doc-input');
   const fileInput = document.getElementById('file-input');
   const audienceButtons = Array.from(document.querySelectorAll('#audience-buttons button'));
@@ -19,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activeAudience = 'junior';
   let transformedMarkdown = '';
+  let transformInFlight = false;
 
   initLocale(languageSelect);
   initIngest(fileInput, docInput);
@@ -33,12 +39,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  transformBtn?.addEventListener('click', async () => {
+  if (transformBtn && transformBtn.dataset.boundClick !== '1') {
+    transformBtn.dataset.boundClick = '1';
+    transformBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (transformInFlight) {
+        return;
+      }
+
     const content = docInput.value.trim();
     if (!content) {
       alert('Please enter or upload documentation content');
       return;
     }
+      transformInFlight = true;
 
     transformBtn.disabled = true;
     transformBtn.textContent = 'Transforming...';
@@ -86,8 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
       toolShell?.classList.remove('is-busy');
       transformBtn.disabled = false;
       transformBtn.textContent = 'Transform';
+      transformInFlight = false;
     }
   });
+  }
 
   copyBtn?.addEventListener('click', async () => {
     if (!transformedMarkdown.trim()) return;

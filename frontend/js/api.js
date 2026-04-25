@@ -132,7 +132,16 @@ async function streamSSE(path, payload, onChunk, onDone, defaultErrorMessage) {
 
       if (dataParts.length > 0) {
         // Multiple data lines in one event are joined with "\n".
-        onChunk(dataParts.join('\n'));
+        const chunk = dataParts.join('\n');
+        // Preserve newline-only chunks so streamed markdown keeps section spacing.
+        if (chunk === '') {
+          continue;
+        }
+        if (chunk.startsWith('[ERROR]')) {
+          const msg = chunk.replace(/^\[ERROR\]\s*/, '').trim();
+          throw new Error(msg || defaultErrorMessage);
+        }
+        onChunk(chunk);
       }
     }
   };

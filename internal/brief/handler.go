@@ -110,7 +110,7 @@ func GenerateHandler(geminiClient *gemini.Client) http.HandlerFunc {
 			flusher: flusher,
 		}
 
-		if err := geminiClient.StreamTransform(ctx, prompt, streamWriter); err != nil {
+		if err := geminiClient.StreamTransform(ctx, prompt, streamWriter, flusher); err != nil {
 			fmt.Fprintf(w, "data: [ERROR] %v\n\n", err)
 			flusher.Flush()
 		}

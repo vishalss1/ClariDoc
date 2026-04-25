@@ -50,7 +50,17 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
 
   // Transform button click handler
   const transformBtn = document.getElementById('transform-btn');
-  transformBtn.addEventListener('click', async () => {
+  let transformInFlight = false;
+  if (transformBtn.dataset.boundClick === '1') {
+    return;
+  }
+  transformBtn.dataset.boundClick = '1';
+  transformBtn.addEventListener('click', async (event) => {
+    event.preventDefault();
+    if (transformInFlight) {
+      return;
+    }
+
     const content = textarea.value.trim();
 
     if (!content) {
@@ -87,6 +97,7 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
 
     transformBtn.disabled = true;
     transformBtn.textContent = 'Processing...';
+    transformInFlight = true;
 
     const outputBuffer = { current: '' };
 
@@ -111,6 +122,7 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
           setFlowState('done');
           transformBtn.disabled = false;
           transformBtn.textContent = 'Transform';
+          transformInFlight = false;
         }
       );
     } catch (err) {
@@ -120,6 +132,7 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
       setStep(1);
       transformBtn.disabled = false;
       transformBtn.textContent = 'Transform';
+      transformInFlight = false;
     }
   });
 }
