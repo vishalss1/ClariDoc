@@ -10,127 +10,228 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <header class="header">
-    <h1>ClariDoc</h1>
-    <p class="tagline">The right context for the right person</p>
+  <header class="top-nav">
+    <div class="nav-inner">
+      <a href="#" class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>ClariDoc</span>
+      </a>
+      <nav class="nav-links" aria-label="Main Navigation">
+        <button id="nav-clarify-link" class="nav-link" type="button">Clarify</button>
+        <button id="nav-brief-link" class="nav-link" type="button">Brief</button>
+        <a class="nav-link" href="#features">Docs</a>
+        <button id="nav-start-btn" class="btn btn-primary btn-sm" type="button">Start Transform</button>
+      </nav>
+    </div>
   </header>
 
-  <main class="container">
-    <section class="mode-switch">
-      <div class="button-group" id="mode-buttons">
-        <button type="button" data-mode="clarify" class="active">Clarify</button>
-        <button type="button" data-mode="brief">Brief</button>
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="kicker">Fast documentation comprehension</p>
+        <h1>Understand any doc. Instantly.</h1>
+        <p class="hero-subtext">
+          ClariDoc adapts documentation to your level and language so you can move faster without getting stuck.
+        </p>
+        <div class="hero-actions">
+          <button id="hero-start-btn" class="btn btn-primary" type="button">Start Transform</button>
+          <button id="hero-brief-btn" class="btn btn-secondary" type="button">Try Brief Mode</button>
+        </div>
       </div>
-    </section>
 
-    <div id="clarify-view" class="mode-view">
-      <!-- Input Section -->
-      <section class="input-section">
-        <div class="input-controls">
-          <textarea id="doc-input" placeholder="Paste your documentation here..."></textarea>
-          <div class="file-upload">
-            <input type="file" id="file-input" accept=".md,.txt">
-            <label for="file-input" class="file-label">Upload .md or .txt file</label>
+      <aside class="hero-preview" aria-label="Product Preview">
+        <div class="preview-head">
+          <span>Original</span>
+          <span>Transformed</span>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-card">
+            <p class="preview-title">README.md</p>
+            <p class="preview-line"></p>
+            <p class="preview-line short"></p>
+            <p class="preview-line"></p>
+            <p class="preview-code"></p>
+            <p class="preview-code short"></p>
+          </div>
+          <div class="preview-card">
+            <p class="preview-title accent">Simplified + Hindi</p>
+            <p class="preview-line"></p>
+            <p class="preview-line short"></p>
+            <p class="preview-line"></p>
+            <p class="preview-code"></p>
+            <p class="preview-code short"></p>
           </div>
         </div>
-      </section>
-
-      <!-- Audience Selector -->
-      <section class="audience-section">
-        <h2>Who is this for?</h2>
-        <div class="button-group" id="audience-buttons">
-          <button type="button" data-audience="junior" class="active">Junior Dev</button>
-          <button type="button" data-audience="senior">Senior Dev</button>
-          <button type="button" data-audience="nontechnical">Non-Technical</button>
-        </div>
-      </section>
-
-      <!-- Language Selector -->
-      <section class="language-section">
-        <h2>Output Language</h2>
-        <select id="language-select">
-          <option value="">Loading languages...</option>
-        </select>
-      </section>
-
-      <!-- Transform Button -->
-      <section class="transform-section">
-        <button id="transform-btn" class="transform-button">Transform</button>
-      </section>
-
-      <!-- Output Section -->
-      <section class="output-section">
-        <div class="output-grid">
-          <div class="output-panel">
-            <h3>Original</h3>
-            <div id="original-panel" class="panel-content"></div>
-          </div>
-          <div class="output-panel">
-            <h3>Transformed</h3>
-            <div id="output-panel" class="panel-content"></div>
-          </div>
-        </div>
-      </section>
+      </aside>
     </div>
+  </section>
 
-    <div id="brief-view" class="mode-view hidden">
-      <section class="brief-input-section">
-        <h2>Goal</h2>
-        <textarea id="brief-goal" class="brief-goal" placeholder="I need to add a new payment provider to the checkout service"></textarea>
+  <main class="container">
+    <section id="app" class="app-shell">
+      <section class="mode-switch">
+        <div class="segmented-control" id="mode-buttons">
+          <button type="button" data-mode="clarify" class="active">Clarify</button>
+          <button type="button" data-mode="brief">Brief</button>
+        </div>
       </section>
 
-      <section class="brief-input-section">
-        <h2>Documentation</h2>
-        <textarea id="brief-doc" placeholder="Paste the relevant architecture or onboarding doc..."></textarea>
-      </section>
-
-      <section class="brief-controls">
-        <div class="brief-control">
-          <h2>Audience</h2>
-          <div class="button-group" id="brief-audience-buttons">
-            <button type="button" data-audience="junior" class="active">Junior Dev</button>
-            <button type="button" data-audience="senior">Senior Dev</button>
-            <button type="button" data-audience="nontechnical">Non-Technical</button>
+      <div id="clarify-view" class="mode-view">
+        <section class="card input-card">
+          <h2 class="section-title">Input</h2>
+          <div class="input-controls">
+            <textarea id="doc-input" placeholder="Paste your documentation here..."></textarea>
+            <div class="file-upload">
+              <input type="file" id="file-input" accept=".md,.txt">
+              <label for="file-input" class="btn btn-secondary">Upload .md or .txt</label>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div class="brief-control">
-          <h2>Output Language</h2>
-          <select id="brief-language-select">
-            <option value="">Loading languages...</option>
-          </select>
-        </div>
-      </section>
+        <section class="card controls-row">
+          <div class="control-group">
+            <h3 class="control-label">Audience</h3>
+            <div class="segmented-control" id="audience-buttons">
+              <button type="button" data-audience="junior" class="active">Junior Dev</button>
+              <button type="button" data-audience="senior">Senior Dev</button>
+              <button type="button" data-audience="nontechnical">Non-Technical</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <h3 class="control-label">Language</h3>
+            <select id="language-select">
+              <option value="">Loading languages...</option>
+            </select>
+          </div>
+          <div class="control-group action-group">
+            <button id="transform-btn" class="btn btn-primary" type="button">Transform</button>
+          </div>
+        </section>
 
-      <section class="transform-section">
-        <button id="brief-analyze-btn" class="transform-button">Analyze Gaps</button>
-      </section>
+        <section class="output-section">
+          <div class="output-grid">
+            <div class="output-panel">
+              <h3>Original</h3>
+              <div id="original-panel" class="panel-content"></div>
+            </div>
+            <div class="output-panel">
+              <h3>Transformed</h3>
+              <div id="output-panel" class="panel-content"></div>
+            </div>
+          </div>
+        </section>
+      </div>
 
-      <section class="output-section">
-        <div class="output-grid">
+      <div id="brief-view" class="mode-view hidden">
+        <section class="card brief-step">
+          <p class="step-label">Step 1</p>
+          <h2 class="section-title">Goal + Documentation</h2>
+          <div class="brief-stack">
+            <textarea id="brief-goal" class="brief-goal" placeholder="I need to add a new payment provider to the checkout service"></textarea>
+            <textarea id="brief-doc" placeholder="Paste the relevant architecture or onboarding doc..."></textarea>
+          </div>
+          <div class="brief-controls">
+            <div class="control-group">
+              <h3 class="control-label">Audience</h3>
+              <div class="segmented-control" id="brief-audience-buttons">
+                <button type="button" data-audience="junior" class="active">Junior Dev</button>
+                <button type="button" data-audience="senior">Senior Dev</button>
+                <button type="button" data-audience="nontechnical">Non-Technical</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <h3 class="control-label">Language</h3>
+              <select id="brief-language-select">
+                <option value="">Loading languages...</option>
+              </select>
+            </div>
+            <div class="control-group action-group">
+              <button id="brief-analyze-btn" class="btn btn-primary" type="button">Analyze Gaps</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="output-section brief-grid">
           <div class="output-panel">
+            <p class="step-label">Step 2</p>
             <h3>Gap Report</h3>
             <div id="brief-gap-panel" class="panel-content">Run analysis to see what is covered, what is missing, and which files are needed.</div>
           </div>
           <div class="output-panel">
+            <p class="step-label">Step 3</p>
             <h3>Context Files</h3>
             <div id="brief-file-loop" class="panel-content">Requested files will appear here after analysis.</div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="transform-section">
-        <button id="brief-generate-btn" class="transform-button" disabled>Generate Briefing</button>
-      </section>
-
-      <section class="output-section">
-        <div class="output-panel">
-          <h3>Briefing Output</h3>
+        <section class="card brief-step">
+          <p class="step-label">Step 4</p>
+          <div class="brief-output-head">
+            <h3>Briefing Output</h3>
+            <button id="brief-generate-btn" class="btn btn-primary" type="button" disabled>Generate Briefing</button>
+          </div>
           <div id="briefing-panel" class="panel-content"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="stats-strip">
+      <article class="stat-item">
+        <h3>Real-time streaming</h3>
+        <p>Token-level updates without waiting for full completion.</p>
+      </article>
+      <article class="stat-item">
+        <h3>Audience-aware output</h3>
+        <p>Junior, senior, and non-technical readers get tailored results.</p>
+      </article>
+      <article class="stat-item">
+        <h3>Multi-language support</h3>
+        <p>Instant transforms across a broad language list.</p>
+      </article>
+    </section>
+
+    <section id="features" class="features-section">
+      <p class="kicker">Core capabilities</p>
+      <h2>Everything you need to move from docs to action</h2>
+      <div class="features-grid">
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <span></span>
+          </div>
+          <h3>Real-Time Transform</h3>
+          <p>Streamed markdown output so you can start reading before generation completes.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <span></span>
+          </div>
+          <h3>Audience-Aware Output</h3>
+          <p>Switch between technical depth levels without rewriting source docs manually.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <span></span>
+          </div>
+          <h3>Brief Mode</h3>
+          <p>Goal-driven analysis that identifies missing context and generates actionable briefings.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="cta-footer">
+      <div class="cta-content">
+        <p class="kicker">Get started</p>
+        <h2>Ready to actually understand your docs?</h2>
+        <div class="cta-actions">
+          <button id="footer-start-btn" class="btn btn-primary" type="button">Start Transform</button>
+          <button id="footer-brief-btn" class="btn btn-secondary" type="button">Try Brief Mode</button>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <p>ClariDoc</p>
+  </footer>
 
   <script type="module" src="/js/main.js"></script>
 </body>

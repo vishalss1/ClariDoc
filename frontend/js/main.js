@@ -10,9 +10,17 @@ import { initBrief } from './brief.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Query DOM elements
+  const appSection = document.getElementById('app');
   const modeButtons = document.querySelectorAll('#mode-buttons button');
   const clarifyView = document.getElementById('clarify-view');
   const briefView = document.getElementById('brief-view');
+  const navClarifyLink = document.getElementById('nav-clarify-link');
+  const navBriefLink = document.getElementById('nav-brief-link');
+  const navStartBtn = document.getElementById('nav-start-btn');
+  const heroStartBtn = document.getElementById('hero-start-btn');
+  const heroBriefBtn = document.getElementById('hero-brief-btn');
+  const footerStartBtn = document.getElementById('footer-start-btn');
+  const footerBriefBtn = document.getElementById('footer-brief-btn');
 
   const docInput = document.getElementById('doc-input');
   const fileInput = document.getElementById('file-input');
@@ -48,21 +56,39 @@ document.addEventListener('DOMContentLoaded', () => {
     briefGenerateBtn
   );
 
+  function setMode(mode) {
+    modeButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    if (mode === 'brief') {
+      clarifyView.classList.add('hidden');
+      briefView.classList.remove('hidden');
+    } else {
+      briefView.classList.add('hidden');
+      clarifyView.classList.remove('hidden');
+    }
+  }
+
+  function goToMode(mode) {
+    setMode(mode);
+    if (appSection) {
+      appSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   modeButtons.forEach(button => {
     button.addEventListener('click', () => {
-      modeButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
-      const mode = button.dataset.mode;
-      if (mode === 'brief') {
-        clarifyView.classList.add('hidden');
-        briefView.classList.remove('hidden');
-      } else {
-        briefView.classList.add('hidden');
-        clarifyView.classList.remove('hidden');
-      }
+      setMode(button.dataset.mode);
     });
   });
+
+  navClarifyLink?.addEventListener('click', () => goToMode('clarify'));
+  navBriefLink?.addEventListener('click', () => goToMode('brief'));
+  navStartBtn?.addEventListener('click', () => goToMode('clarify'));
+  heroStartBtn?.addEventListener('click', () => goToMode('clarify'));
+  heroBriefBtn?.addEventListener('click', () => goToMode('brief'));
+  footerStartBtn?.addEventListener('click', () => goToMode('clarify'));
+  footerBriefBtn?.addEventListener('click', () => goToMode('brief'));
 
   console.log('ClariDoc initialized');
 });
