@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/vishalss1/ClariDoc/internal/gemini"
 	"github.com/vishalss1/ClariDoc/internal/ingest"
+	"github.com/vishalss1/ClariDoc/internal/locale"
 	"github.com/vishalss1/ClariDoc/internal/transform"
 )
 
@@ -45,7 +45,7 @@ func main() {
 	http.HandleFunc("/test-gemini", handleTestGemini(geminiClient))
 	http.HandleFunc("/transform", transform.TransformHandler(geminiClient))
 	http.HandleFunc("/ingest", ingest.IngestHandler())
-	http.HandleFunc("/locale", handleLocale)
+	http.HandleFunc("/locale", locale.LocaleHandler())
 
 	fmt.Printf("ClariDoc server starting on port %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -58,7 +58,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "<!DOCTYPE html><html><head><title>ClariDoc</title></head><body><h1>ClariDoc - Phase 4</h1><p>Server is running.</p><ul><li>Test Ingest: <code>curl -X POST /ingest -F 'file=@README.md'</code></li><li>Test Transform: <a href='/test-gemini'>/test-gemini</a></li></ul></body></html>")
+	fmt.Fprintln(w, "<!DOCTYPE html><html><head><title>ClariDoc</title></head><body><h1>ClariDoc - Phase 5 Complete</h1><p>Server is running.</p><ul><li>Test Ingest: <code>curl -X POST /ingest -F 'file=@README.md'</code></li><li>Test Locale: <code>curl 'http://localhost:8080/locale?region=Karnataka,India'</code> (requires MAPS_API_KEY)</li><li>Test Transform: <code>curl -X POST /transform -H 'Content-Type: application/json' -d '{\"content\":\"# Test\",\"audience\":\"junior\",\"target_language\":\"English\",\"source_language\":\"English\"}'</code></li></ul></body></html>")
 }
 
 func handleTestGemini(client *gemini.Client) http.HandlerFunc {
@@ -110,15 +110,3 @@ func (sw *streamWriter) Write(p []byte) (int, error) {
 }
 
 
-func handleLocale(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	// Stub response for Phase 1
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"country_code":        "",
-		"suggested_languages": []string{},
-	})
-}

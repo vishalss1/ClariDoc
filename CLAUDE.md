@@ -4,7 +4,7 @@
 
 ClariDoc bridges the gap between what a doc says and what a reader needs to *do*. It has two product modes built sequentially: **Clarify** (Phase 1–8) and **Brief** (post-launch roadmap).
 
-Built in Go, Gemini 2.0 Flash, Google Maps Geocoding for locale inference, deployed on Cloud Run.
+Built in Go, Gemini 2.0 Flash.
 
 ---
 
@@ -25,7 +25,7 @@ Takes any doc → explains it for your level and language.
 
 Two axes:
 - **Audience** → Junior Dev | Senior Dev | Non-Technical
-- **Output language** → detected from region via Maps Geocoding, user-selectable
+- **Output language** → user-selected directly from a language dropdown
 
 Backend derives prompt strategy from the combination. No mode names exposed to the user.
 
@@ -42,9 +42,8 @@ Not a rewrite of the doc. A briefing: "Here's what this means for your work. Her
 |---|---|
 | Backend | Go (`net/http`, no framework) |
 | AI | Gemini 2.0 Flash via Gemini API |
-| Geo/Locale | Google Maps Geocoding API |
-| Frontend | Vanilla JS + HTML (single file) |
-| Deployment | Google Cloud Run |
+| Frontend | Vanilla JS + HTML (multi-file) |
+| Deployment | TBD (Render / Railway / Cloud Run) |
 
 ---
 
@@ -64,7 +63,8 @@ claridoc/
 │   ├── ingest/
 │   │   └── parser.go            # Plain text, markdown, .md/.txt file upload parsing
 │   └── locale/
-│       └── maps.go              # Maps Geocoding API → country_code + language suggestions
+│       ├── handler.go           # GET /locale — returns static language list (Maps removed)
+│       └── languages.go         # Static list of 50+ supported languages
 ├── frontend/
 │   ├── index.html               # Shell: DOM structure, loads CSS + JS
 │   ├── css/
@@ -73,13 +73,12 @@ claridoc/
 │   │   └── components.css       # Buttons, dropdowns, file input, audience selector, panels
 │   └── js/
 │       ├── api.js               # All fetch calls: /ingest, /locale, /transform, /brief/*
-│       ├── locale.js            # Region input → GET /locale → populate language dropdown
+│       ├── locale.js            # Populates language dropdown from static GET /locale list on page load
 │       ├── ingest.js            # File upload + paste handling → POST /ingest → fill textarea
 │       ├── transform.js         # Audience selector state, transform button → SSE stream
 │       ├── render.js            # Markdown rendering via marked.js, stream buffer → DOM update
 │       └── main.js              # Entry point: wires all modules on DOMContentLoaded
 ├── .env.example
-├── Dockerfile
 ├── go.mod
 └── CLAUDE.md
 ```
@@ -124,32 +123,26 @@ data: यह प्रोजेक्ट...
 - Returns `{ "content": "<extracted markdown>" }`
 - Frontend calls this on file select, result fills the textarea
 
-### `GET /locale?region=Karnataka,India`
-- Calls Maps Geocoding API
-- Returns `{ "country_code": "IN", "suggested_languages": ["Hindi", "Kannada", "Tamil", "English"] }`
-- Frontend calls on region input blur → populates language dropdown
+### `GET /locale`
+- Returns static list of supported languages
+- Returns `{ "languages": ["English", "Hindi", "Spanish", "French", "German", "Portuguese", "Japanese", "Chinese", "Korean", "Arabic", "Bengali", "Tamil", "Telugu", "Kannada", "Russian", "Indonesian", "Turkish", "Vietnamese", "Thai", "Swahili", ...] }`
+- Called once on page load to populate the language dropdown
+- No query params, no external API call
 
 ---
 
 ## Data Flow
 
 ```
+Page load → [GET /locale] → static language list → language dropdown populated
+
 User pastes doc OR uploads file
         │
         ▼
 [POST /ingest] → parser.go → clean markdown string
         │
         ▼
-User types region → [GET /locale] → Maps Geocoding API
-                                         │
-                                         ▼
-                              suggested_languages list
-                                         │
-                                         ▼
-                              Language dropdown pre-filled
-        │
-        ▼
-User selects: Audience (Junior | Senior | Non-Technical) + Target Language
+User selects: Audience (Junior | Senior | Non-Technical) + Target Language (from dropdown)
         │
         ▼
 [POST /transform] → prompts.go derives strategy from audience × language
@@ -210,8 +203,6 @@ User: <content>
 ## Frontend Layout
 
 ```
-[ Region input (text) ]  →  on blur → GET /locale → fills language dropdown
-
 [ Doc input: textarea (paste) | file upload button (.md, .txt) ]
 
 [ Audience: Junior Dev | Senior Dev | Non-Technical ]  (button group)
@@ -235,34 +226,10 @@ Markdown rendered in both panels via `marked.js` from CDN.
 
 ```env
 GEMINI_API_KEY=
-MAPS_API_KEY=
 PORT=8080
 ```
 
 ---
-
-## Dockerfile
-
-```dockerfile
-FROM golang:1.22-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN go build -o claridoc ./cmd/main.go
-
-FROM alpine:latest
-WORKDIR /app
-COPY --from=builder /app/claridoc .
-EXPOSE 8080
-CMD ["./claridoc"]
-```
-
-```bash
-gcloud run deploy claridoc \
-  --source . \
-  --region asia-south1 \
-  --allow-unauthenticated \
-  --set-env-vars GEMINI_API_KEY=$GEMINI_API_KEY,MAPS_API_KEY=$MAPS_API_KEY
-```
 
 ---
 
@@ -273,7 +240,7 @@ Do not proceed to the next phase until the current phase's "Done when" condition
 
 ---
 
-### Phase 1 — Project Scaffold
+### Phase 1 — Project Scaffold ✅ COMPLETE
 
 **Goal:** Repo compiles, server starts, all routes registered, env loaded.
 
@@ -292,7 +259,7 @@ go get github.com/joho/godotenv
 
 ---
 
-### Phase 2 — Gemini Core
+### Phase 2 — Gemini Core ✅ COMPLETE
 
 **Goal:** Gemini client initializes, all 5 prompt strategies build correctly, streaming works.
 
@@ -310,7 +277,7 @@ go get github.com/joho/godotenv
 
 ---
 
-### Phase 3 — Transform Endpoint
+### Phase 3 — Transform Endpoint ✅ COMPLETE
 
 **Goal:** `POST /transform` accepts JSON, dispatches to Gemini, streams SSE response to caller.
 
@@ -334,7 +301,7 @@ Returns streamed markdown output.
 
 ---
 
-### Phase 4 — Ingest Endpoint
+### Phase 4 — Ingest Endpoint ✅ COMPLETE
 
 **Goal:** `POST /ingest` handles both file upload and raw text body, returns clean markdown.
 
@@ -358,23 +325,18 @@ curl -X POST http://localhost:8080/ingest -H "Content-Type: text/plain" -d "# He
 
 ---
 
-### Phase 5 — Locale Endpoint
+### Phase 5 — Locale Endpoint ✅ COMPLETE
 
-**Goal:** `GET /locale?region=X` returns country code and ordered language suggestions.
+**Goal:** `GET /locale` returns static list of supported languages.
 
-**Files to create:**
-- `internal/locale/maps.go`
-  - `GetLocale(region, apiKey string) (countryCode string, languages []string, err error)`
-  - Calls `https://maps.googleapis.com/maps/api/geocode/json?address=<region>&key=<apiKey>`
-  - Extracts `country` short name from `address_components`
-  - Maps country code → language list via internal static map (cover at minimum: IN, US, GB, DE, FR, ES, PT, JP, CN, KR, RU, AR, BR, ID, NG, EG, PK, BD, VN, TR)
-  - English always appended if not already present
-- Register `LocaleHandler` in `cmd/main.go`
+**Files:**
+- `internal/locale/languages.go` — `SupportedLanguages() []string`, 97 languages, English first
+- `internal/locale/handler.go` — returns `{ "languages": [...] }`, no query params, no external API
 
 **Done when:**
 ```bash
-curl "http://localhost:8080/locale?region=Karnataka,India"
-# returns { "country_code": "IN", "suggested_languages": ["Hindi","Kannada","Tamil","English"] }
+curl "http://localhost:8080/locale"
+# returns { "languages": ["English", "Hindi", "Spanish", ...] }
 ```
 
 ---
@@ -387,7 +349,6 @@ curl "http://localhost:8080/locale?region=Karnataka,India"
 - Load `.env` via `godotenv.Load()`
 - Initialize `gemini.NewClient(os.Getenv("GEMINI_API_KEY"))`
 - Pass client into `TransformHandler`
-- Pass `MAPS_API_KEY` into `LocaleHandler`
 - Add CORS middleware: `Access-Control-Allow-Origin: *` for dev
 - `GET /` serves `frontend/` directory via `http.FileServer(http.Dir("frontend"))` — serves index.html, css/, js/ statically
 
@@ -424,12 +385,13 @@ No build step, no framework, no bundler. ES modules via `<script type="module">`
 
 **`frontend/js/api.js`**
 - `postIngest(formData)` → `POST /ingest`, returns `{ content }`
-- `getLocale(region)` → `GET /locale?region=...`, returns `{ suggested_languages }`
+- `getLocale()` → `GET /locale`, returns `{ languages: [...] }` — static list, no query param
 - `streamTransform(payload, onChunk, onDone)` → `POST /transform`, reads `ReadableStream`, calls `onChunk(chunk)` per token
 
 **`frontend/js/locale.js`**
-- Exports `initLocale(regionInput, languageSelect)`
-- On `blur`: calls `api.getLocale` → clears and repopulates `<select>` options
+- Exports `initLocale(languageSelect)`
+- On page load: calls `api.getLocale()` → populates `<select>` with full language list
+- No region input, no API key, no blur event
 
 **`frontend/js/ingest.js`**
 - Exports `initIngest(fileInput, textarea)`
@@ -454,32 +416,14 @@ No build step, no framework, no bundler. ES modules via `<script type="module">`
 
 ---
 
-### Phase 8 — Deploy
 
-**Goal:** Live public URL on Cloud Run for demo.
-
-**Steps:**
-1. Write `Dockerfile` (multi-stage, golang:1.22-alpine builder + alpine runtime)
-2. Embed entire `frontend/` directory via `go:embed` in `cmd/main.go`:
-   ```go
-   //go:embed frontend
-   var frontendFS embed.FS
-   // serve via http.FileServer(http.FS(frontendFS))
-   ```
-3. `gcloud run deploy` with `GEMINI_API_KEY` and `MAPS_API_KEY` set as env vars
-4. Smoke test: hit `/transform`, `/ingest`, `/locale` against live URL
-5. Confirm SSE streaming works over HTTPS (check `Transfer-Encoding: chunked`)
-
-**Done when:** Demo URL is publicly accessible, full flow works end-to-end over HTTPS.
-
----
 
 ## Google Solutions Challenge Alignment
 
 | Criterion | ClariDoc |
 |---|---|
 | UN SDG | SDG 10 — Reduced Inequalities (language/access barriers in tech) |
-| Google tech | Gemini API (core transform + gap analysis), Maps Platform (locale inference) |
+| Google tech | Gemini API (core transform + gap analysis) |
 | Real-world impact | Reduces friction for junior devs, non-English speakers, and non-technical stakeholders navigating real work |
 | Technical depth | Streaming API, audience×language prompt matrix, multi-turn gap analysis, Go backend, Cloud Run |
 | Demo | Paste any README → select audience + language → live output in 30s |
@@ -619,11 +563,91 @@ Do not pad. Do not repeat the doc back to them.
 User: Goal: <goal>\n\nDoc:\n<doc>\n\nContext:\n<context_files>
 ```
 
-### Build order (Brief mode, after Phase 8)
+### Build order (Brief mode, after Phase 7)
 
+---
+
+### Phase 8 — Brief Core (models + prompts)
+
+**Goal:** Data types and prompt builders for both Brief endpoints defined and tested in isolation.
+
+**Files to create:**
+- `internal/brief/models.go`
+  - `BriefAnalyzeRequest { Goal, Audience, Doc, TargetLanguage string }`
+  - `ContextFile { Filename, Content string }`
+  - `GapReport { Covered []string, Gaps []string, RequestedFiles []RequestedFile }`
+  - `RequestedFile { Filename, Reason string }`
+  - `BriefGenerateRequest { Goal, Audience, Doc, TargetLanguage string; ContextFiles []ContextFile }`
+  - Validation: `Audience` must be `junior|senior|nontechnical`, `Goal` and `Doc` non-empty
+- `internal/brief/prompts.go`
+  - `BuildAnalyzePrompt(audience, goal, doc string) string` — gap detection prompt, instructs Gemini to return JSON only
+  - `BuildGeneratePrompt(audience, targetLang, goal, doc string, files []ContextFile) string` — briefing prompt, audience-aware, assembles context files as named blocks
+
+**Done when:** Both prompt builders callable, output strings inspectable via a `_test.go`, no compilation errors.
+
+---
+
+### Phase 9 — Brief Analyze Endpoint
+
+**Goal:** `POST /brief/analyze` accepts goal + doc, returns structured gap report JSON.
+
+**Files to create/modify:**
+- `internal/brief/handler.go`
+  - `AnalyzeHandler(geminiClient *gemini.Client) http.HandlerFunc`
+  - Parses + validates `BriefAnalyzeRequest`
+  - Calls `BuildAnalyzePrompt` → passes to Gemini (non-streaming, single response)
+  - Parses Gemini's JSON response into `GapReport`
+  - Returns `GapReport` as JSON — `Content-Type: application/json`
+- Register `POST /brief/analyze` in `cmd/main.go`
+
+**Done when:**
+```bash
+curl -X POST http://localhost:8080/brief/analyze   -H "Content-Type: application/json"   -d '{"goal":"Add a payment provider","audience":"junior","doc":"# Checkout Service
+...","target_language":"English"}'
+# returns { "covered": [...], "gaps": [...], "requested_files": [{...}] }
 ```
-Phase 9:  internal/brief/models.go + prompts.go
-Phase 10: POST /brief/analyze — gap detection, returns JSON gap report
-Phase 11: POST /brief/generate — briefing generation, streamed SSE
-Phase 12: Frontend — Brief tab: goal input → gap report UI → file paste loop → streaming briefing output
+
+---
+
+### Phase 10 — Brief Generate Endpoint
+
+**Goal:** `POST /brief/generate` accepts goal + doc + context files, streams a precise work briefing.
+
+**Files to modify:**
+- `internal/brief/handler.go` (add)
+  - `GenerateHandler(geminiClient *gemini.Client) http.HandlerFunc`
+  - Parses + validates `BriefGenerateRequest`
+  - Calls `BuildGeneratePrompt` → `gemini.StreamTransform`
+  - Sets `Content-Type: text/event-stream`, streams chunks as `data: <chunk>
+
+`
+- Register `POST /brief/generate` in `cmd/main.go`
+
+**Done when:**
+```bash
+curl -X POST http://localhost:8080/brief/generate   -H "Content-Type: application/json"   -d '{"goal":"Add a payment provider","audience":"junior","doc":"# Checkout
+...","context_files":[{"filename":"gateway.go","content":"type PaymentGateway interface {...}"}],"target_language":"English"}'
+# returns streamed markdown briefing
 ```
+
+---
+
+### Phase 11 — Brief Frontend
+
+**Goal:** Brief tab in the UI — full multi-turn flow: goal input → gap report → file paste loop → streaming briefing output.
+
+**Changes to `frontend/index.html`:**
+- Add a tab switcher: `Clarify | Brief` — toggles which panel is visible
+
+**New file `frontend/js/brief.js`:**
+- Exports `initBrief(goalInput, audienceButtons, languageSelect, docTextarea, gapPanel, fileLoop, briefingPanel)`
+- Step 1: user enters goal + pastes doc + selects audience → calls `POST /brief/analyze` → renders gap report in `gapPanel`
+  - Gap report UI: lists what's covered, what's missing, and each requested file with reason
+- Step 2: for each requested file — renders a labeled textarea where user pastes file content
+- Step 3: Analyze button (re-analyze with pasted files) or Generate button → calls `POST /brief/generate` with all collected context → streams briefing into `briefingPanel` via `render.appendChunk`
+
+**Add to `frontend/js/api.js`:**
+- `analyzeBrief(payload)` → `POST /brief/analyze`, returns `GapReport` JSON
+- `streamBrief(payload, onChunk, onDone)` → `POST /brief/generate`, reads `ReadableStream`
+
+**Done when:** Full Brief flow works in browser — enter a goal, paste a doc, see gap report, paste a requested file, click Generate, see streamed briefing output.
