@@ -34,6 +34,7 @@ func main() {
 	mux.Handle("/ingest", corsMiddleware(ingest.IngestHandler()))
 	mux.Handle("/locale", corsMiddleware(locale.LocaleHandler()))
 	mux.Handle("/brief/analyze", corsMiddleware(brief.AnalyzeHandler(geminiClient)))
+	mux.Handle("/brief/generate", corsMiddleware(brief.GenerateHandler(geminiClient)))
 	mux.Handle("/", corsMiddleware(http.FileServer(http.Dir("frontend"))))
 
 	fmt.Printf("ClariDoc server starting on port %s\n", cfg.Port)
