@@ -3,6 +3,7 @@
  */
 
 import { streamTransform } from './api.js';
+import { renderMarkdown, appendChunk, finalizeRender } from './render.js';
 
 /**
  * Initialize audience selector and transform button
@@ -50,35 +51,25 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
     };
 
     // Render original content
-    if (window.marked) {
-      originalPanel.innerHTML = marked.parse(content);
-    } else {
-      originalPanel.textContent = content;
-    }
+    renderMarkdown(originalPanel, content);
 
     // Clear output panel
     outputPanel.innerHTML = '';
     transformBtn.disabled = true;
     transformBtn.textContent = 'Transforming...';
 
-    let outputBuffer = '';
+    const outputBuffer = { current: '' };
 
     try {
       await streamTransform(
         payload,
         // onChunk callback
         (chunk) => {
-          outputBuffer += chunk;
-          if (window.marked) {
-            outputPanel.innerHTML = marked.parse(outputBuffer);
-          } else {
-            outputPanel.textContent = outputBuffer;
-          }
-          // Auto-scroll to bottom
-          outputPanel.scrollTop = outputPanel.scrollHeight;
+          appendChunk(outputPanel, chunk, outputBuffer);
         },
         // onDone callback
         () => {
+          finalizeRender(outputPanel);
           transformBtn.disabled = false;
           transformBtn.textContent = 'Transform';
         }
