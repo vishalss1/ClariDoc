@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/vishalss1/ClariDoc/internal/gemini"
@@ -56,10 +58,40 @@ func TransformHandler(client *gemini.Client) http.HandlerFunc {
 		defer cancel()
 
 		// Stream response
-		err := client.StreamTransform(ctx, prompt, w)
+		streamWriter := &sseWriter{
+			w:       w,
+			flusher: flusher,
+		}
+
+		err := client.StreamTransform(ctx, prompt, streamWriter)
 		if err != nil {
 			fmt.Fprintf(w, "data: [ERROR] %v\n\n", err)
+			flusher.Flush()
 		}
-		flusher.Flush()
 	}
+}
+
+type sseWriter struct {
+	w       io.Writer
+	flusher http.Flusher
+}
+
+func (s *sseWriter) Write(p []byte) (int, error) {
+	if err := writeSSEEvent(s.w, string(p)); err != nil {
+		return 0, err
+	}
+	s.flusher.Flush()
+	return len(p), nil
+}
+
+func writeSSEEvent(w io.Writer, chunk string) error {
+	normalized := strings.ReplaceAll(chunk, "\r\n", "\n")
+	lines := strings.Split(normalized, "\n")
+	for _, line := range lines {
+		if _, err := fmt.Fprintf(w, "data: %s\n", line); err != nil {
+			return err
+		}
+	}
+	_, err := fmt.Fprint(w, "\n")
+	return err
 }

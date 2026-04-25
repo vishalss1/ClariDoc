@@ -54,6 +54,8 @@ claridoc/
 ├── cmd/
 │   └── main.go                  # HTTP server, route registration
 ├── internal/
+│   ├── config/
+│   │   └── config.go            # .env loading + runtime config normalization
 │   ├── gemini/
 │   │   ├── client.go            # Gemini API wrapper, streaming support
 │   │   └── prompts.go           # Prompt builders per audience × language combination
@@ -346,7 +348,7 @@ curl "http://localhost:8080/locale"
 **Goal:** All handlers wired in `cmd/main.go`, CORS enabled, gemini client passed via dependency injection, server production-ready.
 
 **Changes to `cmd/main.go`:**
-- Load `.env` via `godotenv.Load()`
+- Load runtime config via `internal/config/config.go` (which calls `godotenv.Load()` and normalizes defaults)
 - Initialize `gemini.NewClient(os.Getenv("GEMINI_API_KEY"))`
 - Pass client into `TransformHandler`
 - Add CORS middleware: `Access-Control-Allow-Origin: *` for dev

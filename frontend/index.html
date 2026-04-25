@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClariDoc</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>ClariDoc</h1>
+    <p class="tagline">The right context for the right person</p>
+  </header>
+
+  <main class="container">
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-controls">
+        <textarea id="doc-input" placeholder="Paste your documentation here..."></textarea>
+        <div class="file-upload">
+          <input type="file" id="file-input" accept=".md,.txt">
+          <label for="file-input" class="file-label">Upload .md or .txt file</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Audience Selector -->
+    <section class="audience-section">
+      <h2>Who is this for?</h2>
+      <div class="button-group" id="audience-buttons">
+        <button type="button" data-audience="junior" class="active">Junior Dev</button>
+        <button type="button" data-audience="senior">Senior Dev</button>
+        <button type="button" data-audience="nontechnical">Non-Technical</button>
+      </div>
+    </section>
+
+    <!-- Language Selector -->
+    <section class="language-section">
+      <h2>Output Language</h2>
+      <select id="language-select">
+        <option value="">Loading languages...</option>
+      </select>
+    </section>
+
+    <!-- Transform Button -->
+    <section class="transform-section">
+      <button id="transform-btn" class="transform-button">Transform</button>
+    </section>
+
+    <!-- Output Section -->
+    <section class="output-section">
+      <div class="output-grid">
+        <div class="output-panel">
+          <h3>Original</h3>
+          <div id="original-panel" class="panel-content"></div>
+        </div>
+        <div class="output-panel">
+          <h3>Transformed</h3>
+          <div id="output-panel" class="panel-content"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
