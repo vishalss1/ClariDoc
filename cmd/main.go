@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/vishalss1/ClariDoc/internal/brief"
 	"github.com/vishalss1/ClariDoc/internal/config"
 	"github.com/vishalss1/ClariDoc/internal/gemini"
 	"github.com/vishalss1/ClariDoc/internal/ingest"
@@ -32,6 +33,7 @@ func main() {
 	mux.Handle("/transform", corsMiddleware(transform.TransformHandler(geminiClient)))
 	mux.Handle("/ingest", corsMiddleware(ingest.IngestHandler()))
 	mux.Handle("/locale", corsMiddleware(locale.LocaleHandler()))
+	mux.Handle("/brief/analyze", corsMiddleware(brief.AnalyzeHandler(geminiClient)))
 	mux.Handle("/", corsMiddleware(http.FileServer(http.Dir("frontend"))))
 
 	fmt.Printf("ClariDoc server starting on port %s\n", cfg.Port)

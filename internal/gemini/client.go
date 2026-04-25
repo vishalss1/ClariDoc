@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/genai"
 )
@@ -47,4 +48,35 @@ func (c *Client) StreamTransform(ctx context.Context, prompt string, w io.Writer
 	}
 
 	return nil
+}
+
+// GenerateText calls Gemini with a single prompt and returns the full text output.
+func (c *Client) GenerateText(ctx context.Context, prompt string) (string, error) {
+	model := "gemini-2.5-flash"
+	contents := []*genai.Content{{
+		Parts: []*genai.Part{{Text: prompt}},
+	}}
+
+	resp, err := c.client.Models.GenerateContent(ctx, model, contents, nil)
+	if err != nil {
+		return "", fmt.Errorf("generate content: %w", err)
+	}
+
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
+		return "", fmt.Errorf("empty model response")
+	}
+
+	var out strings.Builder
+	for _, part := range resp.Candidates[0].Content.Parts {
+		if part != nil && part.Text != "" {
+			out.WriteString(part.Text)
+		}
+	}
+
+	text := strings.TrimSpace(out.String())
+	if text == "" {
+		return "", fmt.Errorf("empty model text")
+	}
+
+	return text, nil
 }
