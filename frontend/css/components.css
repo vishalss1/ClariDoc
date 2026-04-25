@@ -136,6 +136,47 @@ select option {
   transform: none;
 }
 
+.brief-goal {
+  min-height: 120px;
+}
+
+.brief-report-section + .brief-report-section {
+  margin-top: 1.5rem;
+}
+
+.brief-report-section h4 {
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.context-file-item + .context-file-item {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.context-file-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.context-file-reason {
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.context-file-textarea {
+  min-height: 180px;
+}
+
+.error-text {
+  color: var(--color-error);
+}
+
 /* Panel Content Markdown Styles */
 .panel-content h1,
 .panel-content h2,

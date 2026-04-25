@@ -50,7 +50,16 @@ export async function getLocale() {
  * @returns {Promise<void>}
  */
 export async function streamTransform(payload, onChunk, onDone) {
-  const response = await fetch(`${BASE_URL}/transform`, {
+  await streamSSE('/transform', payload, onChunk, onDone, 'Transform failed');
+}
+
+/**
+ * POST /brief/analyze - Analyze gaps for a goal+doc pair
+ * @param {Object} payload - Brief analyze request payload
+ * @returns {Promise<{covered: string[], gaps: string[], requested_files: {filename: string, reason: string}[]}>}
+ */
+export async function analyzeBrief(payload) {
+  const response = await fetch(`${BASE_URL}/brief/analyze`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +69,35 @@ export async function streamTransform(payload, onChunk, onDone) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(error || 'Transform failed');
+    throw new Error(error || 'Brief analysis failed');
+  }
+
+  return response.json();
+}
+
+/**
+ * POST /brief/generate - Stream briefing markdown
+ * @param {Object} payload - Brief generate request payload
+ * @param {Function} onChunk - Callback for each stream chunk
+ * @param {Function} onDone - Callback when stream completes
+ * @returns {Promise<void>}
+ */
+export async function streamBrief(payload, onChunk, onDone) {
+  await streamSSE('/brief/generate', payload, onChunk, onDone, 'Brief generation failed');
+}
+
+async function streamSSE(path, payload, onChunk, onDone, defaultErrorMessage) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || defaultErrorMessage);
   }
 
   const reader = response.body.getReader();
