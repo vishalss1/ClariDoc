@@ -67,7 +67,38 @@
   </section>
 
   <main class="container">
-    <section id="app" class="app-shell">
+    <section class="interactive-demo reveal-section contrast-block">
+      <div class="demo-head">
+        <p class="kicker">Interactive Demo</p>
+        <h2>Watch the product work as you interact</h2>
+        <p>Paste docs, trigger transform, and follow each stage from input to streamed output.</p>
+      </div>
+      <div class="demo-cards">
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4m10-10h-4M6 12H2m16.95 6.95-2.83-2.83M7.88 7.88 5.05 5.05m13.9 0-2.83 2.83M7.88 16.12l-2.83 2.83"/></svg>
+          </div>
+          <h3>Paste or Upload</h3>
+          <p>Input is highlighted first so users know exactly where to start.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 6h8M8 12h8M8 18h5"/><path d="M4 4h16v16H4z"/></svg>
+          </div>
+          <h3>Processing State</h3>
+          <p>Shimmer loading and step progress make backend work visible.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="m12 3 9 9-9 9"/></svg>
+          </div>
+          <h3>Streamed Result</h3>
+          <p>Output panels reveal with motion and live token streaming.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="app" class="app-shell reveal-section">
       <section class="mode-switch">
         <div class="segmented-control" id="mode-buttons">
           <button type="button" data-mode="clarify" class="active">Clarify</button>
@@ -75,8 +106,32 @@
         </div>
       </section>
 
-      <div id="clarify-view" class="mode-view">
+      <div id="clarify-view" class="mode-view flow-state idle">
+        <div class="flow-intro">
+          <p class="kicker">Transform Flow</p>
+          <h2>From raw docs to audience-ready output</h2>
+        </div>
         <section class="card input-card">
+          <div class="flow-steps" id="transform-steps">
+            <div class="flow-step active" data-step="1">
+              <span class="flow-step-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg>
+              </span>
+              <span>1. Input</span>
+            </div>
+            <div class="flow-step" data-step="2">
+              <span class="flow-step-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="m18.4 5.6-2.1 2.1"/><path d="m7.7 16.3-2.1 2.1"/></svg>
+              </span>
+              <span>2. Processing</span>
+            </div>
+            <div class="flow-step" data-step="3">
+              <span class="flow-step-icon">
+                <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+              </span>
+              <span>3. Output</span>
+            </div>
+          </div>
           <h2 class="section-title">Input</h2>
           <div class="input-controls">
             <textarea id="doc-input" placeholder="Paste your documentation here..."></textarea>
@@ -107,7 +162,7 @@
           </div>
         </section>
 
-        <section class="output-section">
+        <section id="clarify-output-section" class="output-section">
           <div class="output-grid">
             <div class="output-panel">
               <h3>Original</h3>
@@ -122,7 +177,11 @@
       </div>
 
       <div id="brief-view" class="mode-view hidden">
-        <section class="card brief-step">
+        <div class="flow-intro">
+          <p class="kicker">Brief Flow</p>
+          <h2>Goal-driven analysis with guided context collection</h2>
+        </div>
+        <section id="brief-step-1" class="card brief-step">
           <p class="step-label">Step 1</p>
           <h2 class="section-title">Goal + Documentation</h2>
           <div class="brief-stack">
@@ -151,19 +210,19 @@
         </section>
 
         <section class="output-section brief-grid">
-          <div class="output-panel">
+          <div id="brief-step-2" class="output-panel">
             <p class="step-label">Step 2</p>
             <h3>Gap Report</h3>
             <div id="brief-gap-panel" class="panel-content">Run analysis to see what is covered, what is missing, and which files are needed.</div>
           </div>
-          <div class="output-panel">
+          <div id="brief-step-3" class="output-panel">
             <p class="step-label">Step 3</p>
             <h3>Context Files</h3>
             <div id="brief-file-loop" class="panel-content">Requested files will appear here after analysis.</div>
           </div>
         </section>
 
-        <section class="card brief-step">
+        <section id="brief-step-4" class="card brief-step">
           <p class="step-label">Step 4</p>
           <div class="brief-output-head">
             <h3>Briefing Output</h3>
@@ -174,42 +233,51 @@
       </div>
     </section>
 
-    <section class="stats-strip">
+    <section class="stats-strip reveal-section">
       <article class="stat-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M2 12h4l2 5 4-10 2 5h8"/></svg>
+        </div>
         <h3>Real-time streaming</h3>
         <p>Token-level updates without waiting for full completion.</p>
       </article>
       <article class="stat-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
+        </div>
         <h3>Audience-aware output</h3>
         <p>Junior, senior, and non-technical readers get tailored results.</p>
       </article>
       <article class="stat-item">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg>
+        </div>
         <h3>Multi-language support</h3>
         <p>Instant transforms across a broad language list.</p>
       </article>
     </section>
 
-    <section id="features" class="features-section">
+    <section id="features" class="features-section reveal-section contrast-block">
       <p class="kicker">Core capabilities</p>
       <h2>Everything you need to move from docs to action</h2>
       <div class="features-grid">
         <article class="feature-card">
           <div class="feature-icon" aria-hidden="true">
-            <span></span>
+            <svg viewBox="0 0 24 24"><path d="m13 2-9 14h7l-1 6 10-14h-7l0-6z"/></svg>
           </div>
           <h3>Real-Time Transform</h3>
           <p>Streamed markdown output so you can start reading before generation completes.</p>
         </article>
         <article class="feature-card">
           <div class="feature-icon" aria-hidden="true">
-            <span></span>
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
           </div>
           <h3>Audience-Aware Output</h3>
           <p>Switch between technical depth levels without rewriting source docs manually.</p>
         </article>
         <article class="feature-card">
           <div class="feature-icon" aria-hidden="true">
-            <span></span>
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z"/><path d="M14 2v6h6"/></svg>
           </div>
           <h3>Brief Mode</h3>
           <p>Goal-driven analysis that identifies missing context and generates actionable briefings.</p>

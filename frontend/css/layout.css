@@ -99,6 +99,13 @@
   padding: 0 1.25rem 5rem;
 }
 
+.contrast-block {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+}
+
 .app-shell {
   margin-top: 1.6rem;
 }
@@ -107,16 +114,51 @@
   margin-bottom: 1rem;
 }
 
+.interactive-demo {
+  margin-top: 1.8rem;
+}
+
+.demo-head h2 {
+  margin-top: 0.55rem;
+  font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+}
+
+.demo-head p {
+  margin-top: 0.7rem;
+}
+
+.demo-cards {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 .mode-view.hidden {
   display: none;
 }
 
+.flow-intro {
+  margin-bottom: 0.9rem;
+}
+
+.flow-intro h2 {
+  margin-top: 0.45rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+}
+
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: linear-gradient(145deg, #11161d, #0d131a);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-lg);
   padding: 1.15rem;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28), inset 0 1px 20px rgba(77, 163, 255, 0.03);
+  transition: transform 0.35s ease-out, box-shadow 0.35s ease-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 24px rgba(77, 163, 255, 0.06);
 }
 
 .controls-row {
@@ -138,10 +180,16 @@
 }
 
 .output-panel {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: linear-gradient(145deg, #11161d, #0d131a);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-lg);
   padding: 1rem;
+  transition: transform 0.35s ease-out, box-shadow 0.35s ease-out, opacity 0.45s ease-out;
+}
+
+.output-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 24px rgba(77, 163, 255, 0.06);
 }
 
 .panel-content {
@@ -155,8 +203,83 @@
   padding: 1rem;
 }
 
+#clarify-output-section {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+
+#clarify-view.active #clarify-output-section,
+#clarify-view.streaming #clarify-output-section,
+#clarify-view.done #clarify-output-section {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.flow-steps {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.flow-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.35rem 0.72rem;
+  color: var(--color-text-secondary);
+  font-size: 0.86rem;
+  transition: all 0.35s ease-out;
+}
+
+.flow-step-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.flow-step svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.flow-step.active {
+  color: var(--color-primary);
+  border-color: rgba(77, 163, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.14);
+}
+
+.flow-step.completed {
+  color: #d5e6ff;
+  border-color: rgba(77, 163, 255, 0.3);
+  opacity: 0.75;
+}
+
+#clarify-view.loading .input-controls {
+  transform: scale(0.985);
+  transition: transform 0.3s ease-out;
+}
+
 .brief-step + .brief-step {
   margin-top: 1rem;
+}
+
+#brief-step-1 {
+  transition: transform 0.35s ease-out, box-shadow 0.35s ease-out;
+}
+
+#brief-step-1.has-content {
+  transform: translateY(-2px) scale(1.005);
 }
 
 .brief-stack {
@@ -226,6 +349,17 @@
   font-size: 0.9rem;
 }
 
+.reveal-section {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+
+.reveal-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (max-width: 1040px) {
   .hero-inner {
     grid-template-columns: 1fr;
@@ -237,7 +371,8 @@
   }
 
   .features-grid,
-  .stats-strip {
+  .stats-strip,
+  .demo-cards {
     grid-template-columns: 1fr;
   }
 }

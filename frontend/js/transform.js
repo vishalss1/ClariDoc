@@ -3,7 +3,7 @@
  */
 
 import { streamTransform } from './api.js';
-import { renderMarkdown, appendChunk, finalizeRender } from './render.js';
+import { renderMarkdown, appendChunk, finalizeRender, showSkeleton } from './render.js';
 
 /**
  * Initialize audience selector and transform button
@@ -15,6 +15,27 @@ import { renderMarkdown, appendChunk, finalizeRender } from './render.js';
  */
 export function initTransform(buttons, languageSelect, textarea, originalPanel, outputPanel) {
   let activeAudience = 'junior';
+  const flow = document.getElementById('clarify-view');
+  const stepEls = Array.from(document.querySelectorAll('#transform-steps .flow-step'));
+  const outputSection = document.getElementById('clarify-output-section');
+
+  function setFlowState(state) {
+    if (!flow) return;
+    flow.classList.remove('idle', 'loading', 'active', 'streaming', 'done');
+    flow.classList.add(state);
+  }
+
+  function setStep(activeStep) {
+    stepEls.forEach((stepEl, index) => {
+      const step = index + 1;
+      stepEl.classList.toggle('active', step === activeStep);
+      stepEl.classList.toggle('completed', step < activeStep);
+    });
+  }
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   // Audience button click handlers
   buttons.forEach(button => {
@@ -50,26 +71,44 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
       source_language: sourceLanguage,
     };
 
+    setFlowState('loading');
+    setStep(1);
+
     // Render original content
     renderMarkdown(originalPanel, content);
 
-    // Clear output panel
-    outputPanel.innerHTML = '';
+    // Stage transition: Input -> Processing -> Output
+    await wait(120);
+    setStep(2);
+    showSkeleton(outputPanel, 7);
+    if (outputSection) {
+      outputSection.style.pointerEvents = 'none';
+    }
+
     transformBtn.disabled = true;
-    transformBtn.textContent = 'Transforming...';
+    transformBtn.textContent = 'Processing...';
 
     const outputBuffer = { current: '' };
 
     try {
+      await wait(600);
+      setStep(3);
+      setFlowState('active');
+      if (outputSection) {
+        outputSection.style.pointerEvents = 'auto';
+      }
+
       await streamTransform(
         payload,
         // onChunk callback
         (chunk) => {
+          setFlowState('streaming');
           appendChunk(outputPanel, chunk, outputBuffer);
         },
         // onDone callback
         () => {
           finalizeRender(outputPanel);
+          setFlowState('done');
           transformBtn.disabled = false;
           transformBtn.textContent = 'Transform';
         }
@@ -77,6 +116,8 @@ export function initTransform(buttons, languageSelect, textarea, originalPanel, 
     } catch (err) {
       console.error('Transform error:', err);
       outputPanel.innerHTML = `<span style="color: var(--color-error)">Error: ${err.message}</span>`;
+      setFlowState('idle');
+      setStep(1);
       transformBtn.disabled = false;
       transformBtn.textContent = 'Transform';
     }

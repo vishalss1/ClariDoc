@@ -28,6 +28,9 @@ export function appendChunk(panel, chunk, outputBuffer) {
   } else {
     panel.textContent = outputBuffer.current;
   }
+  panel.classList.remove('stream-chunk-fade');
+  void panel.offsetWidth;
+  panel.classList.add('stream-chunk-fade');
   // Auto-scroll to bottom
   panel.scrollTop = panel.scrollHeight;
 }
@@ -39,4 +42,12 @@ export function appendChunk(panel, chunk, outputBuffer) {
 export function finalizeRender(panel) {
   // Ensure final render is complete
   panel.scrollTop = panel.scrollHeight;
+}
+
+export function showSkeleton(panel, lines = 6) {
+  const chunks = Array.from({ length: lines }, (_, i) => {
+    const width = i % 3 === 0 ? '95%' : i % 3 === 1 ? '82%' : '68%';
+    return `<div class="skeleton" style="height: 12px; border-radius: 8px; margin-bottom: 10px; width:${width};"></div>`;
+  }).join('');
+  panel.innerHTML = chunks;
 }

@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Query DOM elements
   const appSection = document.getElementById('app');
   const modeButtons = document.querySelectorAll('#mode-buttons button');
+  const modeButtonsWrap = document.getElementById('mode-buttons');
   const clarifyView = document.getElementById('clarify-view');
   const briefView = document.getElementById('brief-view');
   const navClarifyLink = document.getElementById('nav-clarify-link');
@@ -57,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   function setMode(mode) {
+    const activeIndex = mode === 'brief' ? 1 : 0;
+    modeButtonsWrap?.style.setProperty('--active-index', String(activeIndex));
     modeButtons.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.mode === mode);
     });
@@ -89,6 +92,17 @@ document.addEventListener('DOMContentLoaded', () => {
   heroBriefBtn?.addEventListener('click', () => goToMode('brief'));
   footerStartBtn?.addEventListener('click', () => goToMode('clarify'));
   footerBriefBtn?.addEventListener('click', () => goToMode('brief'));
+
+  const revealSections = document.querySelectorAll('.reveal-section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  revealSections.forEach((section) => observer.observe(section));
 
   console.log('ClariDoc initialized');
 });

@@ -3,7 +3,7 @@
  */
 
 import { analyzeBrief, streamBrief } from './api.js';
-import { appendChunk, finalizeRender, renderMarkdown } from './render.js';
+import { appendChunk, finalizeRender, renderMarkdown, showSkeleton } from './render.js';
 
 /**
  * Initialize Brief mode interactions
@@ -30,6 +30,22 @@ export function initBrief(
 ) {
   let activeAudience = 'junior';
   let lastReport = null;
+  const step1 = document.getElementById('brief-step-1');
+  const step2 = document.getElementById('brief-step-2');
+  const step3 = document.getElementById('brief-step-3');
+  const step4 = document.getElementById('brief-step-4');
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function markStepActive(stepEl) {
+    [step1, step2, step3, step4].forEach(el => {
+      if (!el) return;
+      el.classList.remove('active-step');
+    });
+    stepEl?.classList.add('active-step');
+  }
 
   audienceButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -37,6 +53,11 @@ export function initBrief(
       button.classList.add('active');
       activeAudience = button.dataset.audience;
     });
+  });
+
+  goalInput.addEventListener('input', () => {
+    if (!step1) return;
+    step1.classList.toggle('has-content', goalInput.value.trim().length > 0);
   });
 
   analyzeBtn.addEventListener('click', async () => {
@@ -54,10 +75,17 @@ export function initBrief(
       return;
     }
 
+    if (step1) {
+      step1.classList.add('has-content');
+    }
+    markStepActive(step2);
+
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = 'Analyzing...';
     generateBtn.disabled = true;
     lastReport = null;
+    showSkeleton(gapPanel, 6);
+    showSkeleton(fileLoop, 4);
 
     try {
       const report = await analyzeBrief({
@@ -67,9 +95,11 @@ export function initBrief(
         target_language: targetLanguage,
       });
 
+      await wait(300);
       lastReport = report;
       renderGapReport(gapPanel, report);
       renderRequestedFiles(fileLoop, report.requested_files || []);
+      markStepActive(step3);
       generateBtn.disabled = false;
     } catch (err) {
       gapPanel.innerHTML = `<p class="error-text">Error: ${escapeHtml(err.message)}</p>`;
@@ -90,6 +120,7 @@ export function initBrief(
     const targetLanguage = languageSelect.value || 'English';
     const contextFiles = collectContextFiles(fileLoop);
 
+    markStepActive(step4);
     const payload = {
       goal,
       audience: activeAudience,
@@ -98,7 +129,7 @@ export function initBrief(
       context_files: contextFiles,
     };
 
-    renderMarkdown(briefingPanel, '');
+    showSkeleton(briefingPanel, 7);
     const outputBuffer = { current: '' };
 
     generateBtn.disabled = true;
@@ -123,26 +154,28 @@ export function initBrief(
 }
 
 function renderGapReport(panel, report) {
-  const covered = (report.covered || []).map(item => `<li>${escapeHtml(item)}</li>`).join('');
-  const gaps = (report.gaps || []).map(item => `<li>${escapeHtml(item)}</li>`).join('');
+  const covered = (report.covered || [])
+    .map((item, i) => `<div class="brief-gap-card" style="animation-delay:${i * 70}ms;"><strong>Covered</strong><p>${escapeHtml(item)}</p></div>`)
+    .join('');
+  const gaps = (report.gaps || [])
+    .map((item, i) => `<div class="brief-gap-card" style="animation-delay:${(i + 1) * 70}ms;"><strong>Gap</strong><p>${escapeHtml(item)}</p></div>`)
+    .join('');
   const requested = (report.requested_files || [])
-    .map(
-      file => `<li><strong>${escapeHtml(file.filename || '')}</strong><br><span>${escapeHtml(file.reason || '')}</span></li>`
-    )
+    .map((file, i) => `<div class="brief-gap-card" style="animation-delay:${(i + 2) * 70}ms;"><strong>${escapeHtml(file.filename || '')}</strong><p>${escapeHtml(file.reason || '')}</p></div>`)
     .join('');
 
   panel.innerHTML = `
     <section class="brief-report-section">
       <h4>Covered</h4>
-      ${covered ? `<ul>${covered}</ul>` : '<p>No covered items returned.</p>'}
+      ${covered || '<p>No covered items returned.</p>'}
     </section>
     <section class="brief-report-section">
       <h4>Gaps</h4>
-      ${gaps ? `<ul>${gaps}</ul>` : '<p>No gaps returned.</p>'}
+      ${gaps || '<p>No gaps returned.</p>'}
     </section>
     <section class="brief-report-section">
       <h4>Requested Files</h4>
-      ${requested ? `<ul>${requested}</ul>` : '<p>No additional files requested.</p>'}
+      ${requested || '<p>No additional files requested.</p>'}
     </section>
   `;
 }
@@ -158,7 +191,7 @@ function renderRequestedFiles(panel, requestedFiles) {
       const filename = file.filename || `context_file_${index + 1}`;
       const reason = file.reason || '';
       return `
-        <div class="context-file-item">
+        <div class="context-file-item" style="animation-delay:${index * 70}ms;">
           <label class="context-file-label" for="context-file-${index}">
             ${escapeHtml(filename)}
           </label>
