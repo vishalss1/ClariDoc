@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/vishalss1/ClariDoc/internal/brief"
@@ -19,28 +17,17 @@ import (
 
 func main() {
 	cfg := config.Load()
-	provider := strings.ToLower(strings.TrimSpace(os.Getenv("PROVIDER")))
-	if provider == "" {
-		provider = "gemini"
-	}
-	groqAPIKey := os.Getenv("GROQ_API_KEY")
+	cfg.LogProviderWarnings()
 
 	// Initialize AI client
 	var geminiClient *gemini.Client
-	if provider == "gemini" && cfg.GeminiAPIKey == "" {
-		log.Println("Warning: GEMINI_API_KEY is empty while PROVIDER=gemini")
-	}
-	if provider == "groq" && strings.TrimSpace(groqAPIKey) == "" {
-		log.Println("Warning: GROQ_API_KEY is empty while PROVIDER=groq")
-	}
-
 	{
 		var err error
-		geminiClient, err = gemini.NewClient(context.Background(), provider, cfg.GeminiAPIKey, groqAPIKey)
+		geminiClient, err = gemini.NewClient(context.Background(), cfg.Provider, cfg.GeminiAPIKey, cfg.GroqAPIKey)
 		if err != nil {
-			log.Printf("Warning: Failed to initialize AI client (provider=%s): %v", provider, err)
+			log.Printf("Warning: Failed to initialize AI client (provider=%s): %v", cfg.Provider, err)
 		} else {
-			log.Printf("AI client initialized (provider=%s)", provider)
+			log.Printf("AI client initialized (provider=%s)", cfg.Provider)
 		}
 	}
 
